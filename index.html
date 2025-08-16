@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Main Page</title>
+
+    <style>
+      body {
+        background-color: black;
+        color: white;
+      }
+      .showcase-music {
+        width: 90vw;
+        height: 60vh;
+        background-color: white;
+        position: relative;
+        border-radius: 3rem;
+      }
+      .display {
+        display: grid;
+        place-items: center;
+      }
+      .run-btn {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: white;
+        display: grid;
+        place-content: center;
+        position: relative;
+        z-index: 1;
+        bottom: 5%;
+        left: 5%;
+        text-align: center;
+        /* margin-left:10%; */
+      }
+      .run {
+        width: 50%;
+        background-color: black;
+        height: 50%;
+        z-index: 1;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      #run-show {
+        clip-path: polygon(0 0, 80% 50%, 0 100%);
+        left: 60%;
+      }
+      #showcase-image {
+        width: 100%;
+        height: 100%;
+        border-radius: 3rem;
+      }
+      .div-run-btn {
+        position: absolute;
+        left: 5%;
+        bottom: 5%;
+        display: flex;
+        gap: 3rem;
+        font-size: xx-large;
+        background-color: black;
+        border-radius: 3rem;
+        width: 90%;
+        text-align: center;
+        align-items: center;
+        height: 20%;
+      }
+      .text {
+        text-align: center;
+        margin-left: 1rem;
+      }
+      h1 {
+        text-align: center;
+      }
+      .right-remove {
+        margin-left: auto;
+        margin-right:7%;
+        margin-top:auto;
+      }
+      
+    </style>
+  </head>
+  <body>
+    <h1>Song Player</h1>
+    <div style="margin: 2rem; text-align: center">
+      <input
+        type="text"
+        id="youtubeUrl"
+        placeholder="Enter YouTube URL"
+        style="width: 50%"
+      />
+      <button id="downloadBtn">Download Video</button>
+      <p id="status"></p>
+    </div>
+    <div id="display" class="display">
+      <!-- <div id="" class="showcase-music">
+        <img id="showcase-image" width="300" height="300" src="" alt="" />
+        <div class="div-run-btn">
+          <div>
+            <div class="run-btn">
+              <div class="run" id="run-show"></div>
+            </div>
+          </div>
+          <span class="text">JUDAS</span>
+          <div class="run-btn right-remove">
+            <img src="assets/remove.svg" width="90" alt="" />
+          </div>
+        </div>
+      </div> -->
+    </div>
+    <ul id="video-list"></ul>
+    <script type="module">
+      // let music_showcase = document.getElementById("showcase-image")
+      // await getVideoThumbnail("http://localhost:3000/songs/judas.mp4").then(thumb => music_showcase.src = thumb)
+      async function removeFile(filename) {
+        const sure = confirm("You want to remove this file?")
+        if(!sure) return;
+        try {
+          const res = await fetch("http://localhost:3000/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filename }), // must match server key
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            console.log(`Success: ${data.message}`);
+            // optionally update UI or remove thumbnail
+          } else {
+            console.error(`Error: ${data.error}`);
+          }
+        } catch (err) {
+          console.error("Network or server error:", err);
+        }
+      }
+      async function getVideoThumbnail(videoUrl) {
+        return new Promise((resolve, reject) => {
+          const video = document.createElement("video");
+          video.src = videoUrl;
+          video.crossOrigin = "anonymous"; // needed if your server sends CORS headers
+          video.muted = true; // required for autoplay without user interaction
+
+          video.addEventListener("loadeddata", () => {
+            video.currentTime = 10; // Seek to the start
+          });
+
+          video.addEventListener("seeked", () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            resolve(canvas.toDataURL("image/png")); // base64 thumbnail
+          });
+
+          video.addEventListener("error", (e) => reject(e));
+        });
+      }
+
+      // main code
+      const res = await fetch("http://localhost:3000/videos");
+      const files = await res.json();
+      const display = document.getElementById("display");
+    //  <div id="" class="showcase-music">
+    //     <img id="showcase-image" width="300" height="300" src="" alt="" />
+    //     <div class="div-run-btn">
+    //       <div>
+    //         <div class="run-btn">
+    //           <div class="run" id="run-show"></div>
+    //         </div>
+    //       </div>
+    //       <span class="text">JUDAS</span>
+    //       <div class="run-btn right-remove">
+    //         <img src="assets/remove.svg" width="90" alt="" />
+    //       </div>
+    //     </div>
+    //   </div>
+      const promises = files.map(async (file) => {
+        const divShowcase_music = document.createElement("div");
+        divShowcase_music.classList.add("showcase-music");
+
+        // thumbnail promise
+        try {
+          const thumb = await getVideoThumbnail(
+            `http://localhost:3000/songs/${encodeURIComponent(file)}`
+          );
+          const img = document.createElement("img");
+          img.src = thumb;
+          img.width = 300;
+          img.width = 300;
+          img.id = "showcase-image";
+          divShowcase_music.appendChild(img);
+        } catch (e) {
+          console.error("Thumbnail error", e);
+        }
+        const div_run_btn = document.createElement("div");
+        div_run_btn.classList.add("div-run-btn");
+        const div = document.createElement("div");
+        const divRunBtn = document.createElement("div");
+        divRunBtn.classList.add("run-btn");
+        const divRun = document.createElement("div");
+        divRun.classList.add("run");
+        divRun.id = "run-show";
+        divRunBtn.appendChild(divRun);
+        div.appendChild(divRunBtn);
+        div_run_btn.appendChild(div);
+        const span = document.createElement("span");
+        span.textContent = file.toUpperCase();
+        div_run_btn.appendChild(span);
+        // link
+        const divRunBtn2 = document.createElement("div");
+        divRunBtn2.classList.add("run-btn", "right-remove");
+        const removeImage = document.createElement("img")
+        removeImage.src = "assets/remove.svg"
+        removeImage.width = 90;
+        divRunBtn2.appendChild(removeImage)
+        div_run_btn.appendChild(divRunBtn2);
+        divShowcase_music.appendChild(div_run_btn);
+        divRunBtn.addEventListener("click", () => {
+          window.location.href = `play.html?video=${encodeURIComponent(file)}`;
+        });
+        divRunBtn2.addEventListener("click", () => {
+          removeFile(file)
+        });
+        // const a = document.createElement("a");
+        // a.href = `play.html?video=${encodeURIComponent(file)}`;
+        // a.textContent = file.toUpperCase();
+        // li.appendChild(a);
+
+        return divShowcase_music;
+      });
+
+      // wait for all to complete
+      const items = await Promise.all(promises);
+      items.forEach((music_showcase) => display.appendChild(music_showcase));
+
+      //Download
+
+      const downloadBtn = document.getElementById("downloadBtn");
+      const urlInput = document.getElementById("youtubeUrl");
+      const status = document.getElementById("status");
+
+      downloadBtn.addEventListener("click", async () => {
+        const url = urlInput.value.trim();
+        if (!url) return alert("Please enter a YouTube URL");
+
+        status.textContent = "Downloading...";
+        try {
+          const res = await fetch("http://localhost:3000/download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            status.textContent = `Downloaded: ${data.filename}`;
+          } else {
+            status.textContent = `Error: ${data.error}`;
+          }
+        } catch (err) {
+          status.textContent = `Error: ${err.message}`;
+        }
+      });
+    </script>
+  </body>
+</html>
