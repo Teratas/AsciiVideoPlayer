@@ -61,6 +61,7 @@ app.post("/download", async (req, res) => {
     const info = await youtubedl(url, { dumpSingleJson: true, noWarnings: true, noCheckCertificate: true });
     const title = info.title.replace(/[^\w\s]/gi, ""); // sanitize
     const filePath = path.join(songsDir, `${title}.mp4`);
+    const cookiePath = path.join(__dirname, "cookies.txt");
 
     await youtubedl(url, {
       output: filePath,
@@ -68,7 +69,7 @@ app.post("/download", async (req, res) => {
       noWarnings: true,
       noCheckCertificate: true,
       // add path to your cookies.txt
-      cookies: "./cookies.txt" ?? "",
+      cookies: cookiePath ?? "",
     });
     res.json({ message: "Video downloaded", filename: `${title}.mp4` });
   } catch (err) {
