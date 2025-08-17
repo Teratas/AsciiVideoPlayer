@@ -62,7 +62,14 @@ app.post("/download", async (req, res) => {
     const title = info.title.replace(/[^\w\s]/gi, ""); // sanitize
     const filePath = path.join(songsDir, `${title}.mp4`);
 
-    await youtubedl(url, { output: filePath, format: "mp4" });
+    await youtubedl(url, {
+      output: filePath,
+      format: "mp4",
+      noWarnings: true,
+      noCheckCertificate: true,
+      // add path to your cookies.txt
+      cookies: process.env.YT_COOKIE ?? "",
+    });
     res.json({ message: "Video downloaded", filename: `${title}.mp4` });
   } catch (err) {
     console.error("Download error:", err);
