@@ -1,5 +1,5 @@
 FROM node
-
+RUN apt-get update && apt-get install -y ffmpeg
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -8,6 +8,6 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 5500 3000
+EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start-deploy"]

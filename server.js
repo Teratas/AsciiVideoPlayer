@@ -29,46 +29,48 @@ app.get("/videos", (req, res) => {
 });
 
 // Download \
-app.post("/download", async (req, res) => {
-  const url = req.body;
-  if (!url) return res.status(400).send("URL required");
-
-  try {
-    // Use youtube-dl to stream video directly
-    const videoProcess = youtubedl.raw(url, {
-      format: "mp4",
-      stdout: true,
-      noCheckCertificate: true,
-      noWarnings: true,
-    });
-
-    videoProcess.stdout.pipe(res);
-
-    videoProcess.on("error", (err) => {
-      console.error("Stream error:", err);
-      res.status(500).send("Failed to stream video");
-    });
-  } catch (err) {
-    console.error("Download/Stream error:", err);
-    res.status(500).send("Failed to process video");
-  }
-});
 // app.post("/download", async (req, res) => {
-//   const { url } = req.body;
-//   if (!url) return res.status(400).json({ error: "URL required" });
+//   const url = req.body;
+//   if (!url) return res.status(400).send("URL required");
 
 //   try {
-//     const info = await youtubedl(url, { dumpSingleJson: true, noWarnings: true, noCheckCertificate: true });
-//     const title = info.title.replace(/[^\w\s]/gi, ""); // sanitize
-//     const filePath = path.join(songsDir, `${title}.mp4`);
+//     // Use youtube-dl to stream video directly
+//     const videoProcess = youtubedl.raw(url, {
+//       format: "mp4",
+//       stdout: true,
+//       noCheckCertificate: true,
+//       noWarnings: true,
+//     });
 
-//     await youtubedl(url, { output: filePath, format: "mp4" });
-//     res.json({ message: "Video downloaded", filename: `${title}.mp4` });
+//     videoProcess.stdout.pipe(res);
+
+//     videoProcess.on("error", (err) => {
+//       console.error("Stream error:", err);
+//       res.status(500).send("Failed to stream video");
+//     });
 //   } catch (err) {
-//     console.error("Download error:", err);
-//     res.status(500).json({ error: "Download failed" });
+//     console.error("Download/Stream error:", err);
+//     res.status(500).send("Failed to process video");
 //   }
 // });
+app.post("/download", async (req, res) => {
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ error: "URL required" });
+
+  try {
+    const info = await youtubedl(url, { dumpSingleJson: true, noWarnings: true, noCheckCertificate: true });
+    const title = info.title.replace(/[^\w\s]/gi, ""); // sanitize
+    const filePath = path.join(songsDir, `${title}.mp4`);
+
+    await youtubedl(url, { output: filePath, format: "mp4" });
+    res.json({ message: "Video downloaded", filename: `${title}.mp4` });
+  } catch (err) {
+    console.error("Download error:", err);
+    res.status(500).json({ error: "Download failed" });
+  }
+});
+
+
 
 // // Delete video
 // app.post("/delete", (req, res) => {
