@@ -3,7 +3,8 @@ const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 const youtubedl = require("youtube-dl-exec"); // youtube-dl
-
+const dotenv = require("dotenv")
+dotenv.config()
 const app = express();
 const PORT = process.env.PORT || 3000;
 

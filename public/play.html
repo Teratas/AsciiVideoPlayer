@@ -12,9 +12,15 @@
         margin: 0;
         overflow: hidden;
       }
-      #ascii {
+      #ascii,
+      #asciiCanvas {
         font-size: 6px;
         line-height: 6px;
+        /* background-color: white; */
+      }
+      .red {
+        /* background-color: red; */
+        width: 65%;
       }
       .canvas {
         width: 100vw;
@@ -59,16 +65,16 @@
       #items {
         /* background-color:white; */
         /* width:80%; */
+        height:70%;
         position: relative;
         display: flex;
         justify-content: center;
+        margin-right:10%;
+        /* margin-bottom: 10%; */
         /* margin-top:3%; */
       }
       .flex {
         display: flex;
-        width: 50%;
-        /* background-color: red; */
-        justify-content: space-between;
       }
       .inline {
         display: inline;
@@ -88,18 +94,36 @@
       .time-range {
         width: 100%;
         /* background-color: white; */
-        
+
         margin-top: 4%;
         display: flex;
         justify-content: center;
         align-items: flex-end;
       }
+      .z-1 {
+        z-index: 1;
+      }
     </style>
   </head>
   <body id="body">
     <!-- <input type="file" id="videoInput" accept="video/mp4"> -->
+    <div class="flex">
+      <div class="flex ml10 z-1">
+        <label for="fps">Select fps</label>
+        <select id="fps" name="fps" class="ml10">
+          <option value="1">30 fps</option>
+          <option selected value="2">60 fps</option>
+          <option value="4">120 fps</option>
+        </select>
+      </div>
+      <div class="flex ml10">
+        <label for="fps">Colored</label>
+        <input id="colored" type="checkbox" />
+      </div>
+    </div>
     <div id="canvasDiv" class="canvas">
       <pre id="ascii"></pre>
+      <canvas id="asciiCanvas" class="red"></canvas>
     </div>
     <div id="time-range-display" class="time-range">
       <!-- <input type="text" /> -->
@@ -107,8 +131,9 @@
 
     <div id="items">
       <div id="mutedBtn" class="run-btn">
-        <img src="assets/muted.svg" width="90" alt="" />
+        <img src="./assets/muted.svg" width="90" alt="" />
       </div>
+      <input id="volumeSlider" type="range" min="0" max="100" value="50" />
       <div class="display-items">
         <div id="run-btn" class="run-btn ml10">
           <div class="run" id="pause-show"></div>
@@ -116,43 +141,52 @@
       </div>
 
       <div id="reloadBtn" class="run-btn">
-        <img src="assets/reload.svg" width="90" alt="" />
+        <img src="./assets/reload.svg" width="90" alt="" />
       </div>
     </div>
     <!-- <div class="run-btn"><img src="assets/reload.svg" width="90" alt=""></div> -->
 
     <script>
+      const select = document.getElementById("fps");
+      const volumeSlider = document.getElementById("volumeSlider");
+      const colored = document.getElementById("colored");
       const time_range_display = document.getElementById("time-range-display");
       const input_range = document.createElement("input");
       // const timeSpan = document.createElement("span");
       input_range.type = "range";
       input_range.min = 0;
       input_range.value = 0;
-      input_range.max=0;
+      input_range.max = 0;
       // input_range.max = video.duration;
-      input_range.style = "width: 80%; margin-top: 10px;";
+      input_range.style = "width: 80%;";
       time_range_display.appendChild(input_range);
       // time_range_display.appendChild(timeSpan)
       // <input type="range" id="seekBar" min="0" max="100" value="0" style="width: 80%; margin-top: 10px;">
       document.addEventListener("keydown", () => {
         if (event.key.toLowerCase() === "c") {
-          window.location.href = "http://127.0.0.1:5500";
+          window.location.href = window.location.origin;
         }
-        if(event.key.toLowerCase() === "r"){
+        if (event.key.toLowerCase() === "r") {
           ASCII_CHARS = getReverse(ASCII_CHARS);
         }
+        if(event.key.toLowerCase() === "t"){
+          colored.checked = !colored.checked;
+          isColored = !isColored
+        }
       });
-      
 
+      colored.addEventListener("change", () => {
+        isColored = colored.checked;
+      });
       // seek video when user drags
       input_range.addEventListener("input", () => {
         video.currentTime = input_range.value;
       });
       let ASCII_CHARS = "@#%*+=-:. ";
-      function getReverse(s){
+      function getReverse(s) {
         return s.split("").reverse().join("");
       }
-      ASCII_CHARS = getReverse(ASCII_CHARS)
+      ASCII_CHARS = getReverse(ASCII_CHARS);
       // ASCII_CHARS = ASCII_CHARS.split("").reverse().join("")
       // const body = document.getElementById("body")
       // body.style.backgroundColor = "white"
@@ -201,52 +235,225 @@
         // start your ASCII player logic with this video
         video.play();
       }
+
+      // function play() {
+      //   if (video.paused || video.ended) {
+      //     clearInterval(interval);
+      //     return;
+      //   }
+
+      //   let browserWidth = window.innerWidth;
+      //   let browserHeight = window.innerHeight;
+
+      //   let charWidth = 8;
+      //   let charHeight = 16;
+
+      //   let width = Math.floor((browserWidth / charWidth) * 2);
+      //   let height = Math.floor(
+      //     (video.videoHeight / video.videoWidth) *
+      //       width *
+      //       (charWidth / charHeight)
+      //   );
+      //   canvas.width = width;
+      //   canvas.height = height;
+      //   ctx.drawImage(video, 0, 0, width, height);
+
+      //   let frame = "";
+      //   let pixels = ctx.getImageData(0, 0, width, height).data;
+      //   for (let y = 0; y < height; y++) {
+      //     let line = "";
+      //     for (let x = 0; x < width; x++) {
+      //       let i = (y * width + x) * 4;
+      //       let gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+      //       let char =
+      //         ASCII_CHARS[Math.floor((gray / 256) * ASCII_CHARS.length)];
+      //       if (isColored) {
+      //         line += `<span style="color: rgb(${pixels[i]},${pixels[i + 1]},${
+      //           pixels[i + 2]
+      //         })">${char}</span>`;
+      //       } else {
+      //         line += char;
+      //       }
+      //     }
+      //     frame += line + "<br>"; // use <br> instead of "\n" for HTML
+      //   }
+      //   asciiDiv.innerHTML = frame;
+      // }
+      // Measure char width in text mode
+
       let canvasDiv = document.getElementById("canvasDiv");
       let newDiv = document.createElement("div");
+      let isColored = false;
+      let asciiCanvas = document.getElementById("asciiCanvas");
+      let asciiCtx = asciiCanvas.getContext("2d");
+
+      // function play() {
+      //   if (video.paused || video.ended) {
+      //     clearInterval(interval);
+      //     return;
+      //   }
+
+      //   let browserWidth = window.innerWidth;
+      //   let browserHeight = window.innerHeight;
+
+      //   let charWidth = 8;
+      //   let charHeight = 16;
+
+      //   let width = Math.floor((browserWidth / charWidth) * 2);
+      //   let height = Math.floor(
+      //     (video.videoHeight / video.videoWidth) *
+      //       width *
+      //       (charWidth / charHeight)
+      //   );
+
+      //   canvas.width = width;
+      //   canvas.height = height;
+      //   ctx.drawImage(video, 0, 0, width, height);
+      //   let pixels = ctx.getImageData(0, 0, width, height).data;
+
+      //   // --- DOM rendering (if you want to keep it) ---
+      //   if (!isColored) {
+      //     let frame = "";
+      //     for (let y = 0; y < height; y++) {
+      //       let line = "";
+      //       for (let x = 0; x < width; x++) {
+      //         let i = (y * width + x) * 4;
+      //         let gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+      //         let char =
+      //           ASCII_CHARS[Math.floor((gray / 256) * ASCII_CHARS.length)];
+      //         line += char;
+      //       }
+      //       frame += line + "\n";
+      //     }
+      //     asciiDiv.textContent = frame;
+      //     asciiCanvas.style.display = "none";
+      //     asciiDiv.style.display = "block";
+      //   } else {
+      //     // --- Canvas rendering (MUCH faster for colored mode) ---
+      //     asciiCanvas.width = width * charWidth;
+      //     asciiCanvas.height = height * charHeight;
+      //     asciiCtx.clearRect(0, 0, asciiCanvas.width, asciiCanvas.height);
+      //     asciiCtx.font = `${charHeight}px monospace`;
+      //     asciiCtx.textBaseline = "top";
+
+      //     for (let y = 0; y < height; y++) {
+      //       for (let x = 0; x < width; x++) {
+      //         let i = (y * width + x) * 4;
+      //         let gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+      //         let char =
+      //           ASCII_CHARS[Math.floor((gray / 256) * ASCII_CHARS.length)];
+
+      //         asciiCtx.fillStyle = `rgb(${pixels[i]},${pixels[i + 1]},${
+      //           pixels[i + 2]
+      //         })`;
+      //         asciiCtx.fillText(char, x * charWidth, y * charHeight, width);
+      //       }
+      //     }
+
+      //     asciiDiv.style.display = "none";
+      //     asciiCanvas.style.display = "block";
+      //   }
+      // }
+      function getCharSize() {
+        const span = document.createElement("span");
+        span.style.fontFamily = "monospace";
+        span.style.fontSize = "6px"; // match your #ascii font-size
+        span.style.lineHeight = "6px"; // match your #ascii line-height
+        span.style.visibility = "hidden";
+        span.textContent = "M"; // any character works
+        document.body.appendChild(span);
+        const width = span.offsetWidth;
+        const height = span.offsetHeight;
+        document.body.removeChild(span);
+        return { width, height };
+      }
+
+      // const { width: CHAR_WIDTH, height: CHAR_HEIGHT } = getCharSize();
+
       function play() {
         if (video.paused || video.ended) {
           clearInterval(interval);
           return;
         }
 
-        let browserWidth = window.innerWidth;
-        let browserHeight = window.innerHeight;
+        // Get character size from text mode
+        const CHAR_SIZE = getCharSize(); // { width, height }
+        const CHAR_WIDTH = CHAR_SIZE.width;
+        const CHAR_HEIGHT = CHAR_SIZE.height;
 
-        let charWidth = 8;
-        let charHeight = 16;
-
-        let width = Math.floor((browserWidth / charWidth) * 2);
-        let height = Math.floor(
+        // Compute how many characters fit horizontally
+        const browserWidth = window.innerWidth * 0.85;
+        const cols = Math.floor(browserWidth / CHAR_WIDTH);
+        const rows = Math.floor(
           (video.videoHeight / video.videoWidth) *
-            width *
-            (charWidth / charHeight)
+            cols *
+            (CHAR_WIDTH / CHAR_HEIGHT)
         );
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(video, 0, 0, width, height);
 
-        let frame = "";
-        let pixels = ctx.getImageData(0, 0, width, height).data;
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            let i = (y * width + x) * 4;
-            let gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
-            let char =
-              ASCII_CHARS[Math.floor((gray / 256) * ASCII_CHARS.length)];
-            frame += char;
+        // Draw video frame to temp canvas
+        canvas.width = cols;
+        canvas.height = rows;
+        ctx.drawImage(video, 0, 0, cols, rows);
+        const pixels = ctx.getImageData(0, 0, cols, rows).data;
+
+        if (!isColored) {
+          // Text mode
+          let frame = "";
+          for (let y = 0; y < rows; y++) {
+            let line = "";
+            for (let x = 0; x < cols; x++) {
+              let i = (y * cols + x) * 4;
+              let gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+              let char =
+                ASCII_CHARS[Math.floor((gray / 256) * ASCII_CHARS.length)];
+              line += char;
+            }
+            frame += line + "\n";
           }
-          frame += "\n";
+          asciiDiv.textContent = frame;
+          asciiDiv.style.display = "block";
+          asciiCanvas.style.display = "none";
+        } else {
+          // Colored canvas mode: match char grid
+          asciiCanvas.width = cols * CHAR_WIDTH;
+          asciiCanvas.height = rows * CHAR_HEIGHT;
+          asciiCtx.clearRect(0, 0, asciiCanvas.width, asciiCanvas.height);
+          asciiCtx.font = `${CHAR_HEIGHT}px monospace`;
+          asciiCtx.textBaseline = "top";
+
+          for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+              let i = (y * cols + x) * 4;
+              let gray = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+              let char =
+                ASCII_CHARS[Math.floor((gray / 256) * ASCII_CHARS.length)];
+              asciiCtx.fillStyle = `rgb(${pixels[i]},${pixels[i + 1]},${
+                pixels[i + 2]
+              })`;
+              asciiCtx.fillText(char, x * CHAR_WIDTH, y * CHAR_HEIGHT);
+            }
+          }
+
+          asciiDiv.style.display = "none";
+          asciiCanvas.style.display = "block";
         }
-        asciiDiv.textContent = frame;
       }
       let div = document.getElementsByClassName("run")[0];
       let isPaused = false;
       let interval; // global so both listeners can access
-
+      video.volume = volumeSlider.value / 100;
+      volumeSlider.addEventListener("input", () => {
+        video.volume = volumeSlider.value / 100;
+        if (video.volume == 0) {
+        }
+      });
       function setPlayInterval() {
-        return setInterval(play, 33);
+        if (interval) clearInterval(interval);
+        return setInterval(play, 33 / parseInt(select.value, 10));
       }
-
+      select.addEventListener("change", () => {
+        interval = setPlayInterval();
+      });
       video.addEventListener("play", () => {
         if (!interval) {
           interval = setPlayInterval(); // start ASCII video interval
