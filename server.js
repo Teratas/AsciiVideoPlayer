@@ -68,7 +68,7 @@ app.post("/download", async (req, res) => {
       noWarnings: true,
       noCheckCertificate: true,
       // add path to your cookies.txt
-      cookies: process.env.YT_COOKIE ?? "",
+      cookies: "./cookies.txt" ?? "",
     });
     res.json({ message: "Video downloaded", filename: `${title}.mp4` });
   } catch (err) {
