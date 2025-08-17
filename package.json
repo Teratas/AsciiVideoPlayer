@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-  "start": "concurrently \"npx http-server -a 0.0.0.0 -p 5500 ./\" \"node server.js\""
+  "start": "concurrently \"npx http-server -a 0.0.0.0 -p 5500 ./\" \"node server.js\"",
+  "start-deploy" : "node server.js"
 },
   "keywords": [],
   "author": "",

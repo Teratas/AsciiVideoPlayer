@@ -118,7 +118,7 @@
         const sure = confirm("You want to remove this file?")
         if(!sure) return;
         try {
-          const res = await fetch("http://localhost:3000/delete", {
+          const res = await fetch(`${window.location.origin}/delete`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ filename }), // must match server key
@@ -162,7 +162,7 @@
       }
 
       // main code
-      const res = await fetch("http://localhost:3000/videos");
+      const res = await fetch(`${window.location.origin}/videos`);
       const files = await res.json();
       const display = document.getElementById("display");
     //  <div id="" class="showcase-music">
@@ -186,7 +186,7 @@
         // thumbnail promise
         try {
           const thumb = await getVideoThumbnail(
-            `http://localhost:3000/songs/${encodeURIComponent(file)}`
+            `${window.location.origin}/songs/${encodeURIComponent(file)}`
           );
           const img = document.createElement("img");
           img.src = thumb;
@@ -250,7 +250,7 @@
 
         status.textContent = "Downloading...";
         try {
-          const res = await fetch("http://localhost:3000/download", {
+          const res = await fetch(`${window.location.origin}/download`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url }),
