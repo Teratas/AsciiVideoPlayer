@@ -28,9 +28,9 @@ app.get("/videos", (req, res) => {
   });
 });
 
-// Download video
+// Download \
 app.post("/download", async (req, res) => {
-  const url = req.query.url;
+  const url = req.body;
   if (!url) return res.status(400).send("URL required");
 
   try {
@@ -53,22 +53,38 @@ app.post("/download", async (req, res) => {
     res.status(500).send("Failed to process video");
   }
 });
+// app.post("/download", async (req, res) => {
+//   const { url } = req.body;
+//   if (!url) return res.status(400).json({ error: "URL required" });
 
-// Delete video
-app.post("/delete", (req, res) => {
-  const { filename } = req.body;
-  if (!filename) return res.status(400).json({ error: "Filename required" });
+//   try {
+//     const info = await youtubedl(url, { dumpSingleJson: true, noWarnings: true, noCheckCertificate: true });
+//     const title = info.title.replace(/[^\w\s]/gi, ""); // sanitize
+//     const filePath = path.join(songsDir, `${title}.mp4`);
 
-  const filePath = path.join(songsDir, filename);
-  fs.access(filePath, fs.constants.F_OK, (err) => {
-    if (err) return res.status(404).json({ error: "File not found" });
+//     await youtubedl(url, { output: filePath, format: "mp4" });
+//     res.json({ message: "Video downloaded", filename: `${title}.mp4` });
+//   } catch (err) {
+//     console.error("Download error:", err);
+//     res.status(500).json({ error: "Download failed" });
+//   }
+// });
 
-    fs.unlink(filePath, (err) => {
-      if (err) return res.status(500).json({ error: "Could not delete file" });
-      res.json({ message: `${filename} deleted successfully` });
-    });
-  });
-});
+// // Delete video
+// app.post("/delete", (req, res) => {
+//   const { filename } = req.body;
+//   if (!filename) return res.status(400).json({ error: "Filename required" });
+
+//   const filePath = path.join(songsDir, filename);
+//   fs.access(filePath, fs.constants.F_OK, (err) => {
+//     if (err) return res.status(404).json({ error: "File not found" });
+
+//     fs.unlink(filePath, (err) => {
+//       if (err) return res.status(500).json({ error: "Could not delete file" });
+//       res.json({ message: `${filename} deleted successfully` });
+//     });
+//   });
+// });
 
 // Catch-all for frontend
 // app.get("*", (req, res) => {
